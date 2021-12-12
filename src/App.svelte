@@ -38,7 +38,6 @@
   setClient(client);
   const sweets = subscribe(OperationDocsStore.subscribeToAll());
 
-
   const addSweet = async () => {
     const name = prompt("name") || "";
     const price = prompt("price") || "";
@@ -79,9 +78,9 @@
     margin: 0;
     padding: 0;
   }
-  .sweetItem{
-    border: 1px solid black;
-    margin:10px;
+  .sweetItem {
+    border: 1px solid #000;
+    margin: 10px;
     padding: 10px;
   }
 </style>
