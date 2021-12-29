@@ -1,10 +1,10 @@
 class RequestHelper {
   constructor() {
-    this.API_URL = "https://lab3web333.herokuapp.com/v1/graphql";
+    this.HASURA_URL = "https://" + API_URL;
   }
 
   async fetchGraphQL(operationsDoc, operationName, variables) {
-    const result = await fetch(this.API_URL, {
+    const result = await fetch(this.HASURA_URL, {
       method: "POST",
       body: JSON.stringify({
         query: operationsDoc,
@@ -13,7 +13,7 @@ class RequestHelper {
       }),
     });
 
-    return await result.json();
+    return result.json();
   }
   fetchMyQuery(operationsDoc) {
     return this.fetchGraphQL(operationsDoc, "MyQuery", {});

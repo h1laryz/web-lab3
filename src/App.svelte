@@ -5,14 +5,23 @@
   import { setClient, subscribe } from "svelte-apollo";
   import { WebSocketLink } from "@apollo/client/link/ws";
   import { getMainDefinition } from "@apollo/client/utilities";
+  import { writable } from "svelte/store";
+  const isOffline = writable(false);
+  const isLoading = writable(false);
 
+  window.onoffline = () => {
+    isOffline.set(true);
+  };
+  window.ononline = () => {
+    isOffline.set(false);
+  };
   function createApolloClient() {
     const httpLink = new HttpLink({
-      uri: "https://lab3web333.herokuapp.com/v1/graphql",
+      uri: "https://" + API_URL,
     });
     const cache = new InMemoryCache();
     const wsLink = new WebSocketLink({
-      uri: "wss://lab3web333.herokuapp.com/v1/graphql",
+      uri: "wss://" + API_URL,
       options: {
         reconnect: true,
       },
@@ -36,27 +45,40 @@
 
   const client = createApolloClient();
   setClient(client);
-  const sweets = subscribe(OperationDocsStore.subscribeToAll());
+  let sweets;
+  try {
+    sweets = subscribe(OperationDocsStore.subscribeToAll());
+  } catch (e) {
+    console.log(e);
+  }
 
   const addSweet = async () => {
+    isLoading.set(true);
     const name = prompt("name") || "";
     const price = prompt("price") || "";
     const count = prompt("count") || "";
     await http.startExecuteMyMutation(
       OperationDocsStore.addOne(name, price, count),
     );
+    isLoading.set(false);
   };
 
-  const deleteSweet = async () => {
+  const deleteSweet = () => {
+    isLoading.set(true);
     const name = prompt("which sweet to delete?") || "";
     if (name) {
-      await http.startExecuteMyMutation(OperationDocsStore.deleteByName(name));
+      http.startExecuteMyMutation(OperationDocsStore.deleteByName(name));
     }
+    isLoading.set(false);
   };
 </script>
 
 <main>
-  {#if $sweets.loading}
+  {#if $isLoading}
+    <img src="./spinner.gif" alt="spinner" />
+  {:else if $isOffline}
+    <h1>You are offline</h1>
+  {:else if $sweets.loading}
     <h1>Loading...</h1>
   {:else if $sweets.error}
     <h1>{$sweets.error}</h1>
