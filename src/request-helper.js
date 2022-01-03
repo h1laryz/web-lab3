@@ -1,3 +1,5 @@
+import { errorMessage, requestCounter } from "./store";
+
 class RequestHelper {
   constructor() {
     this.HASURA_URL = "https://" + API_URL;
@@ -20,14 +22,17 @@ class RequestHelper {
   }
 
   async startFetchMyQuery(operationsDoc) {
+    requestCounter.update((n) => n + 1);
     const { errors, data } = await this.fetchMyQuery(operationsDoc);
 
     if (errors) {
       // handle those errors like a pro
       console.error(errors);
+      errorMessage.set(errors[0].message);
     }
 
     // do something great with this precious data
+    requestCounter.update((n) => n - 1);
     console.log(data);
     return data;
   }
@@ -37,14 +42,18 @@ class RequestHelper {
   }
 
   async startExecuteMyMutation(operationsDoc) {
+    requestCounter.update((n) => n + 1);
     const { errors, data } = await this.executeMyMutation(operationsDoc);
 
     if (errors) {
       // handle those errors like a pro
       console.error(errors);
+      errorMessage.set(errors[0].message);
     }
 
     // do something great with this precious data
+    requestCounter.update((n) => n - 1);
+
     console.log(data);
     return data;
   }
