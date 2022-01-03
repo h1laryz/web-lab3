@@ -29,6 +29,8 @@ class RequestHelper {
       // handle those errors like a pro
       console.error(errors);
       errorMessage.set(errors[0].message);
+    } else {
+      errorMessage.set("");
     }
 
     // do something great with this precious data
@@ -49,6 +51,8 @@ class RequestHelper {
       // handle those errors like a pro
       console.error(errors);
       errorMessage.set(errors[0].message);
+    } else {
+      errorMessage.set("");
     }
 
     // do something great with this precious data
