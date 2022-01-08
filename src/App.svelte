@@ -8,7 +8,6 @@
   import { requestCounter, isOffline, errorMessage } from "./store";
 
   const toAdd = {};
-  const toDelete = {};
   window.onoffline = () => {
     isOffline.set(true);
   };
@@ -49,53 +48,57 @@
   try {
     sweets = subscribe(OperationDocsStore.subscribeToAll());
   } catch (e) {
+    errorMessage.set(e.message);
     console.log(e);
   }
 
   const addSweet = async () => {
     const { name, price, count } = toAdd;
-    await http.startExecuteMyMutation(
-      OperationDocsStore.addOne(name, price, count),
-    );
+    try {
+      await http.startExecuteMyMutation(
+        OperationDocsStore.addOne(name, price, count),
+      );
+    } catch (e) {
+      errorMessage.set("An error occured. Sorry");
+    }
   };
 
-  const deleteSweet = () => {
-    const { name } = toDelete;
-    if (name) {
-      http.startExecuteMyMutation(OperationDocsStore.deleteByName(name));
+  const deleteSweet = async (id) => {
+    try {
+      await http.startExecuteMyMutation(OperationDocsStore.deleteById(id));
+    } catch (e) {
+      errorMessage.set("An error occured. Sorry");
     }
   };
 </script>
 
 <main>
-  {#if $requestCounter}
-    <img src="./spinner.gif" alt="spinner" />
-  {:else if $isOffline}
+  {#if $isOffline}
     <h1>You are offline</h1>
-  {:else if $sweets.loading}
+  {:else if $sweets.loading || $requestCounter}
     <h1>Loading...</h1>
-  {:else if $sweets.error}
-    <h1>{$sweets.error}</h1>
+  {:else if $sweets.error || $errorMessage}
+    <h1>{$sweets.error || $errorMessage}</h1>
   {:else}
     <div>
       <input placeholder="Name" bind:value={toAdd.name} />
       <input placeholder="Price" bind:value={toAdd.price} />
       <input placeholder="Count" bind:value={toAdd.count} />
-
       <button on:click={addSweet}>Add new sweet</button>
     </div>
-    <div>
-      <input placeholder="Name" bind:value={toDelete.name} />
-      <button on:click={deleteSweet}>Delete sweet</button>
-    </div>
     <p class="error">{$errorMessage}</p>
-    {#each $sweets.data.laba3_sweets as sweet}
-      <div class="sweetItem">
-        <p>Name: {sweet.name}</p>
-        <p>Price: {sweet.price}</p>
-        <p>Count: {sweet.count}</p>
-      </div>
-    {/each}
+    {#if $sweets?.data?.laba3_sweets?.length}
+      {#each $sweets.data.laba3_sweets as sweet (sweet.id)}
+        <div class="sweetItem">
+          <p>Name: {sweet.name}</p>
+          <p>Price: {sweet.price}</p>
+          <p>Count: {sweet.count}</p>
+          <button on:click={() => deleteSweet(sweet.id)}>Delete sweet</button>
+        </div>
+      {/each}
+    {:else}
+      <h1>Nothing to show</h1>
+    {/if}
   {/if}
 </main>
 
