@@ -18,8 +18,9 @@ class RequestHelper {
 
       return result.json();
     } catch (e) {
+      console.log(e.message);
       errorMessage.set(e.message);
-      counter.update((n) => n - 1);
+      requestCounter.update((n) => n - 1);
     }
   }
   fetchMyQuery(operationsDoc) {
